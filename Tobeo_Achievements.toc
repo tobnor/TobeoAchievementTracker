@@ -1,7 +1,7 @@
 ## Interface: 100000
 ## Title: Tobeo Achievements Tracker
 ## Author: Tobias Nordvall
-## Version: 0.1
+## Version: 1.0
 ## SavedVariables: TobeoAchievementsTrackerDB
 ## RequiredDeps: Blizzard_AchievementUI
 
