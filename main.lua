@@ -38,7 +38,11 @@ local function OnLoad(self, event, addOnName)
         if TobeoAchievementsTrackerDB == nil then
             TobeoAchievementsTrackerDB = {}
         end
+        if TobeoAchievementsTrackerDB.ignoredCharacters == nil then
+            TobeoAchievementsTrackerDB.ignoredCharacters = {}
+        end
         TobeoAchievementsTrackerDB[thisChar] = thisCharDb
+        TobeoAchievementsTrackerDB.ignoredCharacters = ignoredCharactersCache
     end
 end
 
@@ -60,18 +64,22 @@ local function GenerateTopProgress(achievementId)
     local completedCriterias = 0
     local topChars = {}
     for key, value in pairs(TobeoAchievementsTrackerDB) do
-        if value.achievements[achievementId] ~= nil then
-            local thisAchievement = value.achievements[achievementId]
-            if numberOfCriterias == 0 then
-                numberOfCriterias = thisAchievement.numberOfCriterias
-            end
-            if thisAchievement.completedCriterias > completedCriterias then
-                completedCriterias = thisAchievement.completedCriterias
-                topChars = {}
-                topChars[key] = thisAchievement
-            end
-            if thisAchievement.completedCriterias == completedCriterias then
-                topChars[key] = thisAchievement
+        if ignoredCharactersCache[key] ~= true then
+            if key ~= "ignoredCharacters" then
+                if value.achievements[achievementId] ~= nil then
+                    local thisAchievement = value.achievements[achievementId]
+                    if numberOfCriterias == 0 then
+                        numberOfCriterias = thisAchievement.numberOfCriterias
+                    end
+                    if thisAchievement.completedCriterias > completedCriterias then
+                        completedCriterias = thisAchievement.completedCriterias
+                        topChars = {}
+                        topChars[key] = thisAchievement
+                    end
+                    if thisAchievement.completedCriterias == completedCriterias then
+                        topChars[key] = thisAchievement
+                    end
+                end
             end
         end
     end
@@ -88,7 +96,6 @@ function AchievementTemplateMixin:OnEnter()
     EventRegistry:TriggerEvent("AchievementFrameAchievement.OnEnter", self, self.id);
     if self.completed ~= true then
         local topProgress = GenerateTopProgress(self.id)
-        logToptopProgress = topProgress
         local text = ""
         for key, value in pairs(topProgress) do
             local thisEntry = topProgress[key]
