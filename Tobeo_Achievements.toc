@@ -1,8 +1,10 @@
 ## Interface: 100000
 ## Title: Tobeo Achievements Tracker
-## Author: Tobias Nordvall
-## Version: 1.0
+## Notes: Allows you to track achievement progress across multiple characters.
+## Author: Tobeo
+## Version: 1.0.1
 ## SavedVariables: TobeoAchievementsTrackerDB
 ## RequiredDeps: Blizzard_AchievementUI
 
 main.lua
+settings.lua
