@@ -1,47 +1,59 @@
 local function OnLoad(self, event, addOnName)
     if event == "ADDON_LOADED" or event == "PLAYER_LEAVING_WORLD" and addOnName == "Tobeo_Achievements" then
-        local thisChar = UnitName("player") .. "-" .. GetRealmName()
-        local list = GetCategoryList()
-        thisCharDb = {thisChar=thisChar}
-        local achievements = {}
-        for i = 1, #list do
-            local categoryId = list[i]
-            local numAchievements = GetCategoryNumAchievements(categoryId)
-            local category = GetCategoryInfo(categoryId)
-            for l = 1, numAchievements do
-                local achievementId, achievementName, _, achievementCompleted = GetAchievementInfo(categoryId, l)
-                if achievementCompleted ~= true then 
-                    local numberOfCriterias = GetAchievementNumCriteria(achievementId)
-                    local completedCriterias = 0
-                    local criterias = {}
-                    if numberOfCriterias ~= 0 then 
-                        for j = 1, numberOfCriterias do
-                            local criteriaString, criteriaType, criteriaCompleted, quantity, reqQuantity, charName, flags, assetID, quantityString = GetAchievementCriteriaInfo(achievementId, j)
-                            local criteriaName = criteriaString
-                            criterias[criteriaName] = {
-                                completed = criteriaCompleted,
-                                quantity = quantity,
-                                reqQuantity = reqQuantity,
-                                criteriaType = criteriaType
-                            }
-                            if criteriaCompleted == true then
-                                completedCriterias = completedCriterias + 1
-                            end
-                        end
-                        local thisAchievement = { id=achievementId, achievementName = achievementName, numberOfCriterias=numberOfCriterias, completedCriterias=completedCriterias, criterias=criterias }
-                        achievements[achievementId] = thisAchievement
-                    end
-                end 
-            end
-            thisCharDb.achievements = achievements
-        end
         if TobeoAchievementsTrackerDB == nil then
             TobeoAchievementsTrackerDB = {}
         end
+
         if TobeoAchievementsTrackerDB.ignoredCharacters == nil then
             TobeoAchievementsTrackerDB.ignoredCharacters = {}
         end
-        TobeoAchievementsTrackerDB[thisChar] = thisCharDb
+
+        local charName = UnitName("player") .. "-" .. GetRealmName()
+        local list = GetCategoryList()
+        thisCharDb = {}
+        thisCharDb.level = UnitLevel("player")
+        thisCharDb.name = charName
+
+        if TobeoAchievementsTrackerDB[charName].achievements ~= nil or thisCharDb.checked == nil or thisCharDb.checked <= time() - 86400  then
+            thisCharDb.achievements = TobeoAchievementsTrackerDB[charName].achievements
+        else
+            local achievements = {}
+            for i = 1, #list do
+                local categoryId = list[i]
+                local numAchievements = GetCategoryNumAchievements(categoryId)
+                local category = GetCategoryInfo(categoryId)
+                for l = 1, numAchievements do
+                    local achievementId, achievementName, _, achievementCompleted = GetAchievementInfo(categoryId, l)
+                    if achievementCompleted ~= true then 
+                        local numberOfCriterias = GetAchievementNumCriteria(achievementId)
+                        local completedCriterias = 0
+                        local criterias = {}
+                        if numberOfCriterias ~= 0 then 
+                            for j = 1, numberOfCriterias do
+                                local criteriaString, criteriaType, criteriaCompleted, quantity, reqQuantity, charName, flags, assetID, quantityString = GetAchievementCriteriaInfo(achievementId, j)
+                                local criteriaName = criteriaString
+                                criterias[criteriaName] = {
+                                    completed = criteriaCompleted,
+                                    quantity = quantity,
+                                    reqQuantity = reqQuantity,
+                                    criteriaType = criteriaType
+                                }
+                                if criteriaCompleted == true then
+                                    completedCriterias = completedCriterias + 1
+                                end
+                            end
+                            local thisAchievement = { id=achievementId, achievementName = achievementName, numberOfCriterias=numberOfCriterias, completedCriterias=completedCriterias, criterias=criterias }
+                            achievements[achievementId] = thisAchievement
+                        end
+                    end 
+                end
+                thisCharDb.achievements = achievements
+            end
+            thisCharDb.checked = time()
+        end
+
+
+        TobeoAchievementsTrackerDB[charName] = thisCharDb
         TobeoAchievementsTrackerDB.ignoredCharacters = ignoredCharactersCache
     end
 end
