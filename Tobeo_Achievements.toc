@@ -2,7 +2,7 @@
 ## Title: Tobeo Achievements Tracker
 ## Notes: Allows you to track achievement progress across multiple characters.
 ## Author: Tobeo
-## Version: 1.0.4
+## Version: 1.0.5
 ## SavedVariables: TobeoAchievementsTrackerDB
 ## RequiredDeps: Blizzard_AchievementUI
 

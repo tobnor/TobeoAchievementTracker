@@ -18,7 +18,7 @@ local function OnLoad(self, event, addOnName)
             TobeoAchievementsTrackerDB[charName] = {}
         end
 
-        if TobeoAchievementsTrackerDB[charName].achievements ~= nil or (TobeoAchievementsTrackerDB[charName].checked ~= nil and TobeoAchievementsTrackerDB[charName].checked <= time() - 86400)  then
+        if TobeoAchievementsTrackerDB[charName].achievements ~= nil and (TobeoAchievementsTrackerDB[charName].checked ~= nil and TobeoAchievementsTrackerDB[charName].checked <= time() - 86400)  then
             thisCharDb.achievements = TobeoAchievementsTrackerDB[charName].achievements
         else
             local achievements = {}
@@ -29,25 +29,28 @@ local function OnLoad(self, event, addOnName)
                 for l = 1, numAchievements do
                     local achievementId, achievementName, _, achievementCompleted = GetAchievementInfo(categoryId, l)
                     if achievementCompleted ~= true then 
-                        local numberOfCriterias = GetAchievementNumCriteria(achievementId)
-                        local completedCriterias = 0
-                        local criterias = {}
-                        if numberOfCriterias ~= 0 then 
-                            for j = 1, numberOfCriterias do
-                                local criteriaString, criteriaType, criteriaCompleted, quantity, reqQuantity, charName, flags, assetID, quantityString = GetAchievementCriteriaInfo(achievementId, j)
-                                local criteriaName = criteriaString
-                                criterias[criteriaName] = {
-                                    completed = criteriaCompleted,
-                                    quantity = quantity,
-                                    reqQuantity = reqQuantity,
-                                    criteriaType = criteriaType
-                                }
-                                if criteriaCompleted == true then
-                                    completedCriterias = completedCriterias + 1
+                        if (pcall(function () local num = GetAchievementNumCriteria(achievementId) > 0 end)) then
+                            local numberOfCriterias = GetAchievementNumCriteria(achievementId)                        
+                            local completedCriterias = 0
+                            local criterias = {}
+                            if numberOfCriterias ~= 0 then 
+                                for j = 1, numberOfCriterias do
+                                    local criteriaString, criteriaType, criteriaCompleted, quantity, reqQuantity, charName, flags, assetID, quantityString = GetAchievementCriteriaInfo(achievementId, j)
+                                    local criteriaName = criteriaString
+                                    criterias[criteriaName] = {
+                                        completed = criteriaCompleted,
+                                        quantity = quantity,
+                                        reqQuantity = reqQuantity,
+                                        criteriaType = criteriaType
+                                    }
+                                    if criteriaCompleted == true then
+                                        completedCriterias = completedCriterias + 1
+                                    end
                                 end
+                                local thisAchievement = { id=achievementId, achievementName = achievementName, numberOfCriterias=numberOfCriterias, completedCriterias=completedCriterias, criterias=criterias }
+                                achievements[achievementId] = thisAchievement
                             end
-                            local thisAchievement = { id=achievementId, achievementName = achievementName, numberOfCriterias=numberOfCriterias, completedCriterias=completedCriterias, criterias=criterias }
-                            achievements[achievementId] = thisAchievement
+                        else
                         end
                     end 
                 end
