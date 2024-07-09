@@ -14,7 +14,12 @@ local function OnLoad(self, event, addOnName)
         thisCharDb.level = UnitLevel("player")
         thisCharDb.name = charName
 
-        if TobeoAchievementsTrackerDB[charName].achievements ~= nil or thisCharDb.checked == nil or thisCharDb.checked <= time() - 86400  then
+        print(TobeoAchievementsTrackerDB[charName])
+        if TobeoAchievementsTrackerDB[charName] == nil then
+            TobeoAchievementsTrackerDB[charName] = {}
+        end
+
+        if TobeoAchievementsTrackerDB[charName].achievements ~= nil or (thisCharDb.checked ~= nil and thisCharDb.checked <= time() - 86400)  then
             thisCharDb.achievements = TobeoAchievementsTrackerDB[charName].achievements
         else
             local achievements = {}
