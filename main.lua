@@ -1,5 +1,5 @@
 local function OnLoad(self, event, addOnName)
-    if event == "ADDON_LOADED" or event == "PLAYER_LEAVING_WORLD" and addOnName == "Tobeo_Achievements" then
+    if (event == "ADDON_LOADED" or event == "PLAYER_LEAVING_WORLD") and addOnName == "Tobeo_Achievements" then
         if TobeoAchievementsTrackerDB == nil then
             TobeoAchievementsTrackerDB = {}
         end
@@ -18,8 +18,9 @@ local function OnLoad(self, event, addOnName)
             TobeoAchievementsTrackerDB[charName] = {}
         end
 
-        if TobeoAchievementsTrackerDB[charName].achievements ~= nil and (TobeoAchievementsTrackerDB[charName].checked ~= nil and TobeoAchievementsTrackerDB[charName].checked <= time() - 86400)  then
+        if TobeoAchievementsTrackerDB[charName].achievements ~= nil and (TobeoAchievementsTrackerDB[charName].checked ~= nil and TobeoAchievementsTrackerDB[charName].checked + 86400 >= time())  then
             thisCharDb.achievements = TobeoAchievementsTrackerDB[charName].achievements
+            thisCharDb.checked = TobeoAchievementsTrackerDB[charName].checked
         else
             local achievements = {}
             for i = 1, #list do
