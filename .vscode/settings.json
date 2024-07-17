@@ -1,0 +1,9 @@
+{
+    "Lua.diagnostics.globals": [
+        "AchievementTemplateMixin",
+        "AchievementFrame",
+        "SlashCmdList",
+        "InterfaceOptionsFrame_OpenToCategory",
+        "InterfaceOptions_AddCategory"
+    ]
+}
