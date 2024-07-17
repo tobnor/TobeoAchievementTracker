@@ -3,11 +3,11 @@ local function OnLoad(self, event, addOnName)
         local Tobeo_Achievements_Settings = {};
         Tobeo_Achievements_Settings.TobeoSettings = CreateFrame( "Frame", "Tobeo Achievement Tracker", UIParent );
         Tobeo_Achievements_Settings.TobeoSettings.name = "Tobeo Achievement Tracker";
-        ignoredCharactersCache = {};
+        IgnoredCharactersCache = {};
 
         if(TobeoAchievementsTrackerDB) then
             if(TobeoAchievementsTrackerDB.ignoredCharacters) then
-                ignoredCharactersCache = TobeoAchievementsTrackerDB.ignoredCharacters;
+                IgnoredCharactersCache = TobeoAchievementsTrackerDB.ignoredCharacters;
             end
         end
 
@@ -46,18 +46,18 @@ local function OnLoad(self, event, addOnName)
                 local ignoredCharacterCheckbox = CreateFrame("CheckButton", "IgnoredCharacter", ignoredCharactersScrollBoxContent, "ChatConfigCheckButtonTemplate");
                 ignoredCharacterCheckbox:SetPoint("TOPRIGHT", -16, offset);
                 ignoredCharacterCheckbox:SetSize(20, 20);
-                ignoredCharacterCheckbox:SetChecked(ignoredCharactersCache[key]);
+                ignoredCharacterCheckbox:SetChecked(IgnoredCharactersCache[key]);
     
                 ignoredCharacterCheckbox:SetScript("OnClick", function(self)
                     local tick = self:GetChecked();
                     if(tick) then
                         PlaySound(856);
-                        ignoredCharactersCache[key] = true
-                        TobeoAchievementsTrackerDB.ignoredCharacters = ignoredCharactersCache;
+                        IgnoredCharactersCache[key] = true
+                        TobeoAchievementsTrackerDB.ignoredCharacters = IgnoredCharactersCache;
                     else
                         PlaySound(857);
-                        ignoredCharactersCache[key] = false
-                        TobeoAchievementsTrackerDB.ignoredCharacters = ignoredCharactersCache;
+                        IgnoredCharactersCache[key] = false
+                        TobeoAchievementsTrackerDB.ignoredCharacters = IgnoredCharactersCache;
                     end
                 end);
                 local ignoreCharacterButton = CreateFrame("CheckButton", "IgnoreCharacterButton", ignoredCharactersScrollBoxContent, "UIPanelButtonTemplate");

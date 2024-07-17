@@ -1,75 +1,57 @@
 local function OnLoad(self, event, addOnName)
-    if (event == "ADDON_LOADED" or event == "PLAYER_LEAVING_WORLD") and addOnName == "Tobeo_Achievements" then
+    if event == "ADDON_LOADED" and addOnName == "Tobeo_Achievements" then
+        local thisChar = UnitName("player") .. "-" .. GetRealmName()
+        local list = GetCategoryList()
+        local thisCharDb = {
+            thisChar=thisChar
+        }
+        local achievements = {}
+        for i = 1, #list do
+            local categoryId = list[i]
+            local numAchievements = GetCategoryNumAchievements(categoryId, true)
+            for l = 1, numAchievements do
+                local achievementId, achievementName, _, achievementCompleted = GetAchievementInfo(categoryId, l)
+                if achievementCompleted ~= true and achievementId ~= nil then
+                    local numberOfCriterias = GetAchievementNumCriteria(achievementId)
+                    local completedCriterias = 0
+                    local criterias = {}
+                    if numberOfCriterias ~= nil then 
+                        for j = 1, numberOfCriterias do
+                            local criteriaString, criteriaType, criteriaCompleted, quantity, reqQuantity = GetAchievementCriteriaInfo(achievementId, j)
+                            if criteriaString ~= nil then
+                                criterias[criteriaString] = {
+                                    completed = criteriaCompleted,
+                                    quantity = quantity,
+                                    reqQuantity = reqQuantity,
+                                    criteriaType = criteriaType
+                                }
+                                if criteriaCompleted == true then
+                                    completedCriterias = completedCriterias + 1
+                                end                          
+                            end
+
+                        end
+                        local thisAchievement = { id=achievementId, achievementName=achievementName, numberOfCriterias=numberOfCriterias, completedCriterias=completedCriterias, criterias=criterias }
+                        achievements[achievementId] = thisAchievement
+                    end
+                end
+            end
+            thisCharDb.achievements = achievements
+        end
         if TobeoAchievementsTrackerDB == nil then
             TobeoAchievementsTrackerDB = {}
         end
-
         if TobeoAchievementsTrackerDB.ignoredCharacters == nil then
             TobeoAchievementsTrackerDB.ignoredCharacters = {}
         end
-
-        local charName = UnitName("player") .. "-" .. GetRealmName()
-        local list = GetCategoryList()
-        thisCharDb = {}
-        thisCharDb.level = UnitLevel("player")
-        thisCharDb.name = charName
-
-        if TobeoAchievementsTrackerDB[charName] == nil then
-            TobeoAchievementsTrackerDB[charName] = {}
-        end
-
-        if TobeoAchievementsTrackerDB[charName].achievements ~= nil and (TobeoAchievementsTrackerDB[charName].checked ~= nil and TobeoAchievementsTrackerDB[charName].checked + 86400 >= time())  then
-            thisCharDb.achievements = TobeoAchievementsTrackerDB[charName].achievements
-            thisCharDb.checked = TobeoAchievementsTrackerDB[charName].checked
-        else
-            local achievements = {}
-            for i = 1, #list do
-                local categoryId = list[i]
-                local numAchievements = GetCategoryNumAchievements(categoryId)
-                local category = GetCategoryInfo(categoryId)
-                for l = 1, numAchievements do
-                    local achievementId, achievementName, _, achievementCompleted = GetAchievementInfo(categoryId, l)
-                    if achievementCompleted ~= true then 
-                        if (pcall(function () local num = GetAchievementNumCriteria(achievementId) > 0 end)) then
-                            local numberOfCriterias = GetAchievementNumCriteria(achievementId)                        
-                            local completedCriterias = 0
-                            local criterias = {}
-                            if numberOfCriterias ~= 0 then 
-                                for j = 1, numberOfCriterias do
-                                    local criteriaString, criteriaType, criteriaCompleted, quantity, reqQuantity, charName, flags, assetID, quantityString = GetAchievementCriteriaInfo(achievementId, j)
-                                    local criteriaName = criteriaString
-                                    criterias[criteriaName] = {
-                                        completed = criteriaCompleted,
-                                        quantity = quantity,
-                                        reqQuantity = reqQuantity,
-                                        criteriaType = criteriaType
-                                    }
-                                    if criteriaCompleted == true then
-                                        completedCriterias = completedCriterias + 1
-                                    end
-                                end
-                                local thisAchievement = { id=achievementId, achievementName = achievementName, numberOfCriterias=numberOfCriterias, completedCriterias=completedCriterias, criterias=criterias }
-                                achievements[achievementId] = thisAchievement
-                            end
-                        else
-                        end
-                    end 
-                end
-                thisCharDb.achievements = achievements
-            end
-            thisCharDb.checked = time()
-        end
-
-
-        TobeoAchievementsTrackerDB[charName] = thisCharDb
-        TobeoAchievementsTrackerDB.ignoredCharacters = ignoredCharactersCache
+        TobeoAchievementsTrackerDB[thisChar] = thisCharDb
     end
 end
 
 local function LoadTooltip(self, event, addOnName)
-    if event == "ADDON_LOADED" and addOnName == "Tobeo_Achievements" then
+    if (event == "ADDON_LOADED" and addOnName == "Tobeo_Achievements") then
         TobeoAchievementTooltipFrame:SetSize(100, 100)
-        achievementFrameWidth = AchievementFrame.GetWidth(AchievementFrame)
+        local achievementFrameWidth = AchievementFrame.GetWidth(AchievementFrame)
         TobeoAchievementTooltipFrame:SetPoint("LEFT", "AchievementFrame", "LEFT", achievementFrameWidth, 0) -- or wherever you want the default anchor to be
         TobeoAchievementTooltipFrame:SetBackdrop({ bgFile = "Interface/DialogFrame/UI-DialogBox-Background-Dark", edgeFile = "Interface/Tooltips/UI-Tooltip-Border", tile = true, edgeSize = 10, tileSize = 10, insets = { left = 1, right = 1, top = 1, bottom = 1, }, })
         TobeoAchievementTooltipFrame.Label = TobeoAchievementTooltipFrame:CreateFontString(nil , "BORDER", "GameFontNormal")
@@ -84,7 +66,7 @@ local function GenerateTopProgress(achievementId)
     local completedCriterias = 0
     local topChars = {}
     for key, value in pairs(TobeoAchievementsTrackerDB) do
-        if ignoredCharactersCache[key] ~= true then
+        if IgnoredCharactersCache[key] ~= true then
             if key ~= "ignoredCharacters" then
                 if value.achievements[achievementId] ~= nil then
                     local thisAchievement = value.achievements[achievementId]
@@ -108,7 +90,6 @@ end
 
 local TobeoAddonFrame = CreateFrame("Frame")
 TobeoAddonFrame:RegisterEvent("ADDON_LOADED")
-TobeoAddonFrame:RegisterEvent("PLAYER_LEAVING_WORLD")
 TobeoAddonFrame:SetScript("OnEvent", OnLoad)
 
 function AchievementTemplateMixin:OnEnter()
@@ -124,11 +105,9 @@ function AchievementTemplateMixin:OnEnter()
             local completedCriterias = thisEntry.completedCriterias
             local numberOfCriterias = thisEntry.numberOfCriterias
             if thisEntry.numberOfCriterias == 1 then
-                k, v = next(thisEntry.criterias)
+                local k, v = next(thisEntry.criterias)
                 completedCriterias = v.quantity
                 numberOfCriterias = v.reqQuantity
-                logVCriteria = v
-                logKCriteria = k
             end
             text = text .. cleanedName .. ": " .. completedCriterias .. "/" .. numberOfCriterias .. "\n"
         end
