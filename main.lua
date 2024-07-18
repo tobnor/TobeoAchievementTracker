@@ -1,5 +1,5 @@
-local function OnLoad(self, event, addOnName)
-    if event == "ADDON_LOADED" and addOnName == "Tobeo_Achievements" then
+local function OnLoad(self, event, isLogin)
+    if event == "PLAYER_ENTERING_WORLD" and isLogin then 
         local thisChar = UnitName("player") .. "-" .. GetRealmName()
         local list = GetCategoryList()
         local thisCharDb = {
@@ -15,7 +15,7 @@ local function OnLoad(self, event, addOnName)
                     local numberOfCriterias = GetAchievementNumCriteria(achievementId)
                     local completedCriterias = 0
                     local criterias = {}
-                    if numberOfCriterias ~= nil then 
+                    if numberOfCriterias ~= nil and numberOfCriterias ~= 0 then
                         for j = 1, numberOfCriterias do
                             local criteriaString, criteriaType, criteriaCompleted, quantity, reqQuantity = GetAchievementCriteriaInfo(achievementId, j)
                             if criteriaString ~= nil then
@@ -27,7 +27,7 @@ local function OnLoad(self, event, addOnName)
                                 }
                                 if criteriaCompleted == true then
                                     completedCriterias = completedCriterias + 1
-                                end                          
+                                end         
                             end
 
                         end
@@ -89,7 +89,7 @@ local function GenerateTopProgress(achievementId)
 end
 
 local TobeoAddonFrame = CreateFrame("Frame")
-TobeoAddonFrame:RegisterEvent("ADDON_LOADED")
+TobeoAddonFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
 TobeoAddonFrame:SetScript("OnEvent", OnLoad)
 
 function AchievementTemplateMixin:OnEnter()
