@@ -60,11 +60,15 @@ local function OnLoad(self, event, addOnName)
                         TobeoAchievementsTrackerDB.ignoredCharacters = IgnoredCharactersCache;
                     end
                 end);
-                local ignoreCharacterButton = CreateFrame("CheckButton", "IgnoreCharacterButton", ignoredCharactersScrollBoxContent, "UIPanelButtonTemplate");
                 offset = offset - 20;
             end
         end
-        InterfaceOptions_AddCategory(Tobeo_Achievements_Settings.TobeoSettings);
+        if InterfaceOptions_AddCategory then
+            InterfaceOptions_AddCategory(Tobeo_Achievements_Settings.TobeoSettings);
+        else
+            local category, layout = Settings.RegisterCanvasLayoutCategory(Tobeo_Achievements_Settings.TobeoSettings, 'Tobeo Achievements Tracker');
+            Settings.RegisterAddOnCategory(category);
+        end
     end
 end
 
